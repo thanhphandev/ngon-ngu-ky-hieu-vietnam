@@ -10,8 +10,8 @@ from utils.feature_extraction import extract_features
 from utils.strings import ExpressionHandler
 from utils.tts import TextToSpeech
 from utils.model import ASLClassificationModel
-from utils.visualizer import Visualizer  # <--- Module mới
-from config import MODEL_NAME, MODEL_CONFIDENCE
+from utils.visualizer import Visualizer
+from config import MODEL_NAME, MODEL_CONFIDENCE, PREDICTION_CONFIDENCE_THRESHOLD
 
 # Bỏ qua các cảnh báo không cần thiết
 warnings.filterwarnings("ignore")
@@ -158,40 +158,54 @@ if run_camera:
             face_results = face_mesh.process(image)
             hand_results = hands.process(image)
 
-            # 2. Vẽ (Sử dụng Visualizer mới - GỌN HƠN RẤT NHIỀU)
+            # 2. Vẽ (Sử dụng Visualizer mới)
             image.flags.writeable = True
             image = visualizer.draw_landmarks(image, face_results, hand_results)
 
             # 3. Dự đoán
-            try:
-                feature = extract_features(mp_hands, face_results, hand_results)
-                
-                # Dùng hàm mới predict_with_confidence
-                label, confidence = model.predict_with_confidence(feature)
-                expression_handler.receive(label)
-                ui_text = expression_handler.get_message()
+            # Chỉ dự đoán nếu phát hiện được tay hoặc mặt
+            if face_results.multi_face_landmarks or hand_results.multi_hand_landmarks:
+                try:
+                    feature = extract_features(mp_hands, face_results, hand_results)
+                    
+                    # Dùng hàm mới predict_with_confidence
+                    label, confidence = model.predict_with_confidence(feature)
+                    
+                    # --- LOGIC MỚI: DUAL CONFIDENCE THRESHOLD ---
+                    # Nếu độ tin cậy thấp hơn ngưỡng cho phép -> Coi là "binh_thuong" (Idle)
+                    if confidence < PREDICTION_CONFIDENCE_THRESHOLD:
+                        label = "binh_thuong"
+                    
+                    expression_handler.receive(label)
+                    ui_text = expression_handler.get_message()
 
-                # Cập nhật UI
-                prediction_placeholder.markdown(f'<div class="big-font">{ui_text}</div>', unsafe_allow_html=True)
-                
-                # Cập nhật thanh Confidence
-                confidence_bar.progress(float(confidence))
-                confidence_text.text(f"Độ chính xác: {confidence*100:.1f}%")
+                    # Cập nhật UI
+                    prediction_placeholder.markdown(f'<div class="big-font">{ui_text}</div>', unsafe_allow_html=True)
+                    
+                    # Cập nhật thanh Confidence
+                    confidence_bar.progress(float(confidence))
+                    confidence_text.text(f"Độ chính xác: {confidence*100:.1f}%")
 
-                # Đọc giọng nói
-                if tts_enabled and st.session_state.tts:
-                    speech_text = expression_handler.get_speech_message()
-                    if speech_text and speech_text != "bình_thường":
-                        st.session_state.tts.speak_if_allowed(speech_text, min_interval=min_interval)
+                    # Đọc giọng nói
+                    if tts_enabled and st.session_state.tts:
+                        speech_text = expression_handler.get_speech_message()
+                        # Chỉ đọc nếu có nội dung (binh_thuong đã được map thành "" trong strings.py)
+                        if speech_text:
+                            st.session_state.tts.speak_if_allowed(speech_text, min_interval=min_interval)
 
-            except Exception as e:
-                # print(f"Error: {e}") # Debug only
-                pass
+                except Exception as e:
+                    # print(f"Error: {e}") # Debug only
+                    pass
+            else:
+                # Nếu không có landmarks (không người, không tay), reset UI
+                prediction_placeholder.markdown(f'<div class="big-font">...</div>', unsafe_allow_html=True)
+                confidence_bar.progress(0)
+                confidence_text.text("Đang chờ tín hiệu...")
 
             # Hiển thị
             video_placeholder.image(image, channels="RGB", use_column_width=True)
 
     cap.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows() # Không cần thiết trên Streamlit Cloud và gây lỗi với headless
 else:
     st.info("👋 Hãy bật camera để bắt đầu trải nghiệm.")
