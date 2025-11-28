@@ -27,7 +27,7 @@ Webcam → MediaPipe (FaceMesh, Hands)
 
 ## 3) Các mô-đun chính (file và chức năng)
 - `config.py`
-  - `FEATURES_PER_HAND = 21`, `MODEL_NAME = "simple_5_expression_model.pkl"`, `MODEL_CONFIDENCE = 0.5`.
+  - `FEATURES_PER_HAND = 21`, `MODEL_NAME = "nhom_2.pkl"`, `MODEL_CONFIDENCE = 0.5`.
 - `utils/feature_extraction.py`
   - `extract_face_result(face_results)`: trả về vector 2-D (mean x, y) của các landmark khuôn mặt; nếu không có mặt → vector 0.
   - `extract_hand_result(mp_hands, hand_results)`: trả về vector 84-D cho 2 tay (trường hợp không phát hiện tay hoặc chỉ 1 tay đều được xử lý để giữ kích thước đầu ra cố định).
@@ -66,15 +66,15 @@ python scripts/capture_pose_data.py --pose_name="chao" --confidence=0.6 --durati
 ```
 - Huấn luyện lại mô hình từ dữ liệu trong `data/`:
 ```powershell
-python scripts/train.py --model_name=my_model
+python scripts/train.py --model_name=nhom_2
 ```
 - Cập nhật `config.py` để dùng mô hình mới:
 ```python
-MODEL_NAME = "my_model.pkl"
+MODEL_NAME = "nhom_2.pkl"
 ```
 - Kiểm tra nhanh bằng OpenCV window:
 ```powershell
-python scripts/test_model.py --model_path models/my_model.pkl --confidence 0.6
+python scripts/test_model.py --model_path models/nhom_2.pkl --confidence 0.6
 ```
 
 ## 5) Dòng dữ liệu và quy ước nhãn

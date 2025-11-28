@@ -168,7 +168,6 @@ if run_camera:
                 
                 # Dùng hàm mới predict_with_confidence
                 label, confidence = model.predict_with_confidence(feature)
-                
                 expression_handler.receive(label)
                 ui_text = expression_handler.get_message()
 

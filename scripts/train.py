@@ -4,7 +4,7 @@ import argparse
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.svm import SVC
+from sklearn.svm import SVC # Support Vector Machine
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from datetime import datetime
