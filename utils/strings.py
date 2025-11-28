@@ -3,9 +3,9 @@ class ExpressionHandler:
 
     # Mapping từ nhãn gốc sang emoji + text
     MAPPING = {
+        "binh_thuong": "Ngồi yên 🤐",
         "buoi_sang": "Buổi sáng",
         "buoi_toi": "Buổi tối",
-        "con_cho": "Con chó",
         "con_ga": "Con gà",
         "con_gian": "Con gián",
         "con_meo": "Con mèo",
@@ -19,7 +19,6 @@ class ExpressionHandler:
     SPEECH_MAPPING = {
         "buoi_sang": "Buổi sáng ",
         "buoi_toi": "Buổi tối",
-        "con_cho": "Con chó",
         "con_ga": "Con gà",
         "con_gian": "Con gián",
         "con_meo": "Con mèo",
