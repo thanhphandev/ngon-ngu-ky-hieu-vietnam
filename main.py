@@ -189,8 +189,9 @@ if run_camera:
                     # Đọc giọng nói
                     if tts_enabled and st.session_state.tts:
                         speech_text = expression_handler.get_speech_message()
-                        # Chỉ đọc nếu có nội dung (binh_thuong đã được map thành "" trong strings.py)
-                        if speech_text:
+
+                        # Do not speak if label is "binh_thuong"
+                        if label != "binh_thuong" and speech_text.strip():
                             st.session_state.tts.speak_if_allowed(speech_text, min_interval=min_interval)
 
                 except Exception as e:
